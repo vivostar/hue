@@ -130,11 +130,18 @@ endif
 ###################################
 virtual-env: $(BLD_DIR_ENV)/stamp
 $(BLD_DIR_ENV)/stamp:
-	@echo "--- Creating virtual environment at $(BLD_DIR_ENV)"
-	$(SYS_PYTHON) $(VIRTUAL_BOOTSTRAP) \
-		$(VIRTUALENV_OPTS) --system-site-packages $(BLD_DIR_ENV)
-	@touch $@
-	@echo "--- $(BLD_DIR_ENV) ready"
+	@if [ "$(PYTHON_VER)" = "python2.7" ]; then \
+	  echo "--- Creating virtual environment at $(BLD_DIR_ENV)"; \
+	  $(SYS_PYTHON) $(VIRTUAL_BOOTSTRAP) \
+	    $(VIRTUALENV_OPTS) --system-site-packages $(BLD_DIR_ENV); \
+	  touch $@; \
+	  echo "--- $(BLD_DIR_ENV) ready"; \
+	else \
+	  echo "--- Creating virtual environment at $(BLD_DIR_ENV)"; \
+	  $(SYS_PYTHON) -m pip install --upgrade pip; \
+	  $(SYS_PIP) install virtualenv; \
+	  virtualenv $(BLD_DIR_ENV); \
+	fi
 
 .PHONY: virtual-env
 
