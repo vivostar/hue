@@ -55,4 +55,4 @@ RUN chown -R ${HUEUSER}:${HUEUSER} /etc/supervisord.conf && chown -R ${HUEUSER}:
 EXPOSE 8888 9111
 
 WORKDIR ${HUE_HOME}
-CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
+CMD ["/usr/local/bin/supervisord","-c","/etc/supervisord.conf"]
