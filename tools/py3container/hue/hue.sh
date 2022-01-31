@@ -86,7 +86,7 @@ elif [[ $1 == runcpserver ]]; then
   if [ -e "/etc/hue/conf/saml.ini" ]; then
     set_samlcert
   fi
-  $HUE_BIN/hue runcherrypyserver
+  $HUE_BIN/hue rungunicornserver
 fi
 
 exit 0
