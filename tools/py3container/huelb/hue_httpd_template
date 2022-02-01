@@ -37,6 +37,7 @@ Alias /static ${HUE_HOME}/build/static
 
 Header add Set-Cookie "ROUTEID=.%{BALANCER_WORKER_ROUTE}e; path=/" env=BALANCER_ROUTE_CHANGED
 ProxyPreserveHost Off
+ProxyAddHeaders On
 ProxyPass /static !
 ProxyPass / balancer://hue/ stickysession=ROUTEID
 
