@@ -120,8 +120,6 @@ ext-env-pip-install:
 	@echo '--- Finished $(REQUIREMENT_FILE) into virtual-env'
 	@$(ENV_PIP) install $(NAVOPTAPI_WHL)
 	@echo '--- Finished $(NAVOPTAPI_WHL) into virtual-env'
-	@$(ENV_PIP) install $(PYSAML2_WHL)
-	@echo '--- Finished $(PYSAML2_WHL) into virtual-env'
 
 #
 # ext-eggs
