@@ -25,6 +25,7 @@ RUN set -eux; \
         libxslt-devel \
         ncurses-devel \
         nmap-ncat \
+        procps-ng \
         python38 \ 
         python38-devel \
         rsync \
