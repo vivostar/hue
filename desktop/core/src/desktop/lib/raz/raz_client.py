@@ -255,7 +255,7 @@ class RazClient(object):
         time_offset=0
     )
     raz_req_serialized = raz_req.SerializeToString()
-    signed_request = base64.b64encode(raz_req_serialized)
+    signed_request = base64.b64encode(raz_req_serialized).decode('utf-8')
 
     request_headers["Accept-Encoding"] = "gzip,deflate"
     request_data["context"] = {
