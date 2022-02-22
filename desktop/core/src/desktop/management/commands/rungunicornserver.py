@@ -19,6 +19,7 @@ from __future__ import unicode_literals
 
 import os
 import sys
+import ssl
 import multiprocessing
 
 import gunicorn.app.base
@@ -94,11 +95,11 @@ def rungunicornserver():
 
   options = {
       'access_log_format': None,
-      'accesslog': '-',
+      'accesslog': '/var/log/hive/gunicorn.access.log',
       'backlog': None,
       'bind': [bind_addr],
       'ca_certs': conf.SSL_CACERTS.get(),     # CA certificates file
-      'capture_output': None,
+      'capture_output': True,
       'cert_reqs': None,                      # Whether client certificate is required (see stdlib ssl module)
       'certfile': conf.SSL_CERTIFICATE.get(), # SSL certificate file
       'chdir': None,
@@ -108,7 +109,7 @@ def rungunicornserver():
       'daemon': None,
       'do_handshake_on_connect': None,        # Whether to perform SSL handshake on socket connect (see stdlib ssl module)
       'enable_stdio_inheritance': None,
-      'errorlog': '-',
+      'errorlog': '/var/log/hive/gunicorn.error.log',
       'forwarded_allow_ips': None,
       'graceful_timeout': None,
       'group': None,
