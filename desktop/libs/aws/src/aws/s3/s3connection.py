@@ -26,6 +26,7 @@ else:
   from urllib import unquote
   from urlparse import urlparse as lib_urlparse
 
+from boto import UserAgent
 from boto.connection import HTTPRequest
 from boto.exception import BotoClientError
 from boto.regioninfo import connect
@@ -118,6 +119,8 @@ class RazS3Connection(SignedUrlS3Connection):
         LOG.debug('auth_path=%s' % auth_path)
 
     params = {}
+    headers = headers if headers is not None else {}
+    headers.setdefault('User-Agent', UserAgent)
     http_request = self.build_base_http_request(method, path, auth_path,
                                                 params, headers, data, host)
 
