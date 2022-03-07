@@ -40,7 +40,6 @@ GUNICORN_SERVER_HELP = r"""
   Run Hue using the Gunicorn WSGI server in asynchronous mode.
 """
 
-
 class Command(BaseCommand):
   help = _("Gunicorn Web server for Hue.")
 
@@ -89,13 +88,11 @@ class StandaloneApplication(gunicorn.app.base.BaseApplication):
   def load(self):
     return self.load_wsgiapp()
 
-
 def rungunicornserver():
   bind_addr = conf.HTTP_HOST.get() + ":" + str(conf.HTTP_PORT.get())
 
   options = {
-      'access_log_format': None,
-      'accesslog': '/var/log/hive/gunicorn.access.log',
+      'accesslog': "-",
       'backlog': None,
       'bind': [bind_addr],
       'ca_certs': conf.SSL_CACERTS.get(),     # CA certificates file
@@ -109,7 +106,7 @@ def rungunicornserver():
       'daemon': None,
       'do_handshake_on_connect': None,        # Whether to perform SSL handshake on socket connect (see stdlib ssl module)
       'enable_stdio_inheritance': None,
-      'errorlog': '/var/log/hive/gunicorn.error.log',
+      'errorlog': "-",
       'forwarded_allow_ips': None,
       'graceful_timeout': None,
       'group': None,
@@ -120,14 +117,13 @@ def rungunicornserver():
       'limit_request_fields': None,
       'limit_request_line': None,
       'logconfig': None,
-      'logger_class': None,
-      'loglevel': 'debug',
+      'loglevel': 'info',
       'max_requests': None,
       'max_requests_jitter': None,
       'paste': None,
       'pidfile': None,
       'preload_app': None,
-      'proc_name': None,
+      'proc_name': "hue",
       'proxy_allow_ips': None,
       'proxy_protocol': None,
       'pythonpath': None,
@@ -137,7 +133,7 @@ def rungunicornserver():
       'reload_engine': None,
       'sendfile': None,
       'spew': None,
-      'ssl_version': None,                    # SSL version to use (see stdlib ssl module) [ssl.PROTOCOL_SSLv23, ssl.PROTOCOL_TLSv1]
+      'ssl_version': ssl.PROTOCOL_TLSv1_2,    # SSL version to use (see stdlib ssl module) [ssl.PROTOCOL_SSLv23, ssl.PROTOCOL_TLSv1]
       'statsd_host': None,
       'statsd_prefix': None,
       'suppress_ragged_eofs': None,           # Suppress ragged EOFs (see stdlib ssl module)
@@ -157,4 +153,4 @@ def rungunicornserver():
   StandaloneApplication(handler_app, options).run()
 
 if __name__ == '__main__':
-    rungunicornserver()
+  rungunicornserver()
