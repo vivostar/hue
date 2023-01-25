@@ -23,15 +23,19 @@ import atexit
 import os
 import sys
 import ssl
-import multiprocessing
 import tempfile
 
+import gunicorn
 import gunicorn.app.base
+import logging
+import multiprocessing
+from multiprocessing import Process
 
 from desktop import conf
-from desktop import supervisor, metrics
+from desktop.log import _read_log_conf, setup_log_dir
 from django.core.management.base import BaseCommand
 from django.core.wsgi import get_wsgi_application
+import desktop.log.log_listener as log_listener
 from gunicorn import util
 from multiprocessing.util import _exit_function
 from six import iteritems
@@ -41,23 +45,39 @@ if sys.version_info[0] > 2:
 else:
   from django.utils.translation import ugettext as _
 
-
 GUNICORN_SERVER_HELP = r"""
   Run Hue using the Gunicorn WSGI server in asynchronous mode.
 """
 
+ENV_HUE_PROCESS_NAME = "HUE_PROCESS_NAME"
+if ENV_HUE_PROCESS_NAME not in os.environ:
+  _proc = os.path.basename(len(sys.argv) > 1 and sys.argv[1] or sys.argv[0])
+  os.environ[ENV_HUE_PROCESS_NAME] = _proc
+
 class Command(BaseCommand):
   help = _("Gunicorn Web server for Hue.")
 
+  def add_arguments(self, parser):
+    parser.add_argument('--bind', help=_("Bind Address"), action='store', default=None)
+
   def handle(self, *args, **options):
-    rungunicornserver()
+    rungunicornserver(args=args, options=options)
 
   def usage(self, subcommand):
     return GUNICORN_SERVER_HELP
 
+def activate_translation():
+  from django.conf import settings
+  from django.utils import translation
+
+  # Activate the current language, because it won't get activated later.
+  try:
+    translation.activate(settings.LANGUAGE_CODE)
+  except AttributeError:
+    pass
+
 def number_of_workers():
   return (multiprocessing.cpu_count() * 2) + 1
-
 
 def handler_app(environ, start_response):
   os.environ.setdefault("DJANGO_SETTINGS_MODULE", "desktop.settings")
@@ -66,6 +86,26 @@ def handler_app(environ, start_response):
 def post_worker_init(worker):
   atexit.unregister(_exit_function)
 
+def start_log(logfiles, k="accesslog"):
+  jsonlogconffile=logfiles[k][1]
+  log_dir = setup_log_dir(os.environ[ENV_HUE_PROCESS_NAME])
+  log_conf = _read_log_conf(os.environ[ENV_HUE_PROCESS_NAME], log_dir, log_file=jsonlogconffile)
+  if log_conf is not None:
+    logging.config.dictConfig(log_conf)
+    logging.getLogger(logfiles[k][0]).info('Log listener started.')
+    server_address = "%s/%s"%(log_dir,logfiles[k][2])
+    tcpserver = log_listener.LogRecordUnixDomainSocketReceiver(server_address=server_address)
+    print(f'About to start Unix Domain server server_address on {server_address} ...')
+    tcpserver.serve_until_stopped()
+
+def start_domain_socket_listeners():
+  logfiles = {"accesslog": ("access.log", "accesslog.json", "access.log.s"),
+              "errorlog": ("access.log", "accesslog.json", "access.log.s"),
+              "log": ("%s" % (ENV_HUE_PROCESS_NAME), "%s%s" % (ENV_HUE_PROCESS_NAME, "file.json"),
+                      "%s.s" % (ENV_HUE_PROCESS_NAME))}
+  # Initiate logger process
+  for k in logfiles:
+    Process(target=start_log, args=(logfiles, k,)).start()
 
 class StandaloneApplication(gunicorn.app.base.BaseApplication):
 
@@ -97,8 +137,14 @@ class StandaloneApplication(gunicorn.app.base.BaseApplication):
   def load(self):
     return self.load_wsgiapp()
 
-def rungunicornserver():
-  bind_addr = conf.HTTP_HOST.get() + ":" + str(conf.HTTP_PORT.get())
+  def run(self):
+    super(StandaloneApplication, self).run()
+
+def rungunicornserver(args=[], options={}):
+  if options['bind']:
+    bind_addr = options['bind']
+  else:
+    bind_addr = conf.HTTP_HOST.get() + ":" + str(conf.HTTP_PORT.get())
 
   # Currently gunicorn does not support passphrase suppored SSL Keyfile
   # https://github.com/benoitc/gunicorn/issues/2410
@@ -116,6 +162,14 @@ def rungunicornserver():
     else:
       ssl_keyfile = conf.SSL_PRIVATE_KEY.get()
 
+  # Activate django translation
+  activate_translation()
+
+  # Hide the Server software version in the response body
+  gunicorn.SERVER_SOFTWARE = "apache"
+  os.environ["SERVER_SOFTWARE"] = gunicorn.SERVER_SOFTWARE
+
+  start_domain_socket_listeners()
   options = {
       'accesslog': "-",
       'backlog': 2048,
@@ -156,7 +210,7 @@ def rungunicornserver():
       'raw_paste_global_conf': None,
       'reload': None,
       'reload_engine': None,
-      'sendfile': None,
+      'sendfile': True,
       'spew': None,
       'ssl_version': ssl.PROTOCOL_TLSv1_2,    # SSL version to use
       'statsd_host': None,
@@ -179,4 +233,4 @@ def rungunicornserver():
   StandaloneApplication(handler_app, options).run()
 
 if __name__ == '__main__':
-  rungunicornserver()
+  rungunicornserver(args=sys.argv[1:], options={})

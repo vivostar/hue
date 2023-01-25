@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "disable_existing_loggers": False,
+  "logging": {
+    "formatters": {
+      "default": {
+        "format": "%(asctime)s %(levelname)-8s %(process)s %(name)s %(message)s"
+      }
+    },
+    "handlers": {
+      "file": {
+        "class": "logging.handlers.RotatingFileHandler",
+        "filename": "%LOG_DIR%/error.log",
+        "maxBytes": 5000000,
+        "backupCount": 5,
+        "formatter": "default"
+      }
+    },
+    "root": {
+      "level": "DEBUG",
+      "handlers": ["file"]
+    }
+  }
+}

@@ -49,7 +49,7 @@ CONF_RE = re.compile('%LOG_DIR%|%PROC_NAME%')
 _log_dir = None
 
 
-def _read_log_conf(proc_name, log_dir):
+def _read_log_conf(proc_name, log_dir, log_file='log.conf'):
   """
   _read_log_conf(proc_name, log_dir) -> StringIO or None
 
@@ -61,7 +61,7 @@ def _read_log_conf(proc_name, log_dir):
     elif match.group(0) == '%PROC_NAME%':
       return proc_name
 
-  log_conf = get_desktop_root('conf', 'log.conf')
+  log_conf = get_desktop_root('conf', log_file)
 
   if not os.path.isfile(log_conf):
     return None
@@ -120,6 +120,17 @@ def chown_log_dir(uid, gid):
     print('Failed to chown log directory %s: ex' % (_log_dir, ex), file=sys.stderr)
     return False
 
+def setup_log_dir(log_dir):
+  # Setup log_dir
+  if not log_dir:
+    log_dir = os.getenv("DESKTOP_LOG_DIR", DEFAULT_LOG_DIR)
+  if not os.path.exists(log_dir):
+    try:
+      os.makedirs(log_dir)
+    except OSError as err:
+      print('Failed to create log directory "%s": %s' % (log_dir, err), file=sys.stderr)
+      raise err
+  return log_dir
 
 def basic_logging(proc_name, log_dir=None):
   """
@@ -138,16 +149,7 @@ def basic_logging(proc_name, log_dir=None):
   """
   global FORCE_DEBUG
 
-  # Setup log_dir
-  if not log_dir:
-    log_dir = os.getenv("DESKTOP_LOG_DIR", DEFAULT_LOG_DIR)
-  if not os.path.exists(log_dir):
-    try:
-      os.makedirs(log_dir)
-    except OSError as err:
-      print('Failed to create log directory "%s": %s' % (log_dir, err), file=sys.stderr)
-      raise err
-
+  log_dir = setup_log_dir(log_dir)
   # Remember where our log directory is
   global _log_dir
   _log_dir = log_dir
