@@ -27,7 +27,6 @@ import tempfile
 
 import gunicorn
 import gunicorn.app.base
-import logging
 import multiprocessing
 from multiprocessing import Process
 
@@ -86,26 +85,44 @@ def handler_app(environ, start_response):
 def post_worker_init(worker):
   atexit.unregister(_exit_function)
 
-def start_log(logfiles, k="accesslog"):
-  jsonlogconffile=logfiles[k][1]
-  log_dir = setup_log_dir(os.environ[ENV_HUE_PROCESS_NAME])
-  log_conf = _read_log_conf(os.environ[ENV_HUE_PROCESS_NAME], log_dir, log_file=jsonlogconffile)
-  if log_conf is not None:
-    logging.config.dictConfig(log_conf)
-    logging.getLogger(logfiles[k][0]).info('Log listener started.')
-    server_address = "%s/%s"%(log_dir,logfiles[k][2])
-    tcpserver = log_listener.LogRecordUnixDomainSocketReceiver(server_address=server_address)
-    print(f'About to start Unix Domain server server_address on {server_address} ...')
-    tcpserver.serve_until_stopped()
+#def start_log(k,v):
+#  import json
+#  jsonlogconffile=v[1]
+#  log_dir = setup_log_dir(log_dir="")
+#  log_conf = _read_log_conf(os.environ[ENV_HUE_PROCESS_NAME], log_dir, log_file=jsonlogconffile)
+#  print("Prakash I come here %s %s"%(k,v))
+#  if log_conf is not None:
+#    logging.config.dictConfig(json.loads(log_conf.read()))
+#    logging.getLogger(v[0]).info('Log listener started.')
+#    server_address = "%s/%s"%(log_dir,v[2])
+#    if os.path.exists(server_address):
+#      os.remove(server_address)
+#    tcpserver = log_listener.LogRecordUnixDomainSocketReceiver(server_address=server_address,
+#                                                               handler=log_listener.LogRecordStreamHandler)
+#    print(f'About to start Unix Domain server server_address on {server_address} ...')
+#    tcpserver.serve_until_stopped()
+#
+def start_log(k,v):
+  import json
+  print("Prakash I come here %s %s"%(k,v))
+  if os.path.exists(v[2]):
+    os.remove(v[2])
+  server_address=v[2]
+  tcpserver = log_listener.LogRecordUnixDomainSocketReceiver(server_address=server_address,
+                                                             logconfig=json.loads(open(v[1],"r").read()),
+                                                             logname=v[0])
+  print(f'About to start Unix Domain server server_address on {server_address} ...')
+  tcpserver.serve_until_stopped()
 
 def start_domain_socket_listeners():
-  logfiles = {"accesslog": ("access.log", "accesslog.json", "access.log.s"),
-              "errorlog": ("access.log", "accesslog.json", "access.log.s"),
-              "log": ("%s" % (ENV_HUE_PROCESS_NAME), "%s%s" % (ENV_HUE_PROCESS_NAME, "file.json"),
-                      "%s.s" % (ENV_HUE_PROCESS_NAME))}
+  hue_name = os.environ[ENV_HUE_PROCESS_NAME]
+  #logfiles = {"accesslog": ("access.log", "accesslog.json", "/var/log/hue/access.log.s"),
+  #            "errorlog": ("error.log", "errorlog.json", "/var/log/hue/error.log.s"),
+  logfiles = {"log": ("logfile", "/etc/hue/conf/logfile.json", "/var/log/hue/rungunicornserver.log.s")}
   # Initiate logger process
-  for k in logfiles:
-    Process(target=start_log, args=(logfiles, k,)).start()
+  for k,v in logfiles.items():
+    print("Prakash %s %s" % (k, v))
+    Process(target=start_log, args=(k,v)).start()
 
 class StandaloneApplication(gunicorn.app.base.BaseApplication):
 

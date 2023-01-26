@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Red Dove Consultants Limited. BSD-3-Clause licensed.
+#
 import logging
+import logging.config
 import pickle
 import socketserver
 import struct
@@ -14,6 +18,8 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     This basically logs the record using whatever logging policy is
     configured locally.
     """
+    def setup(self):
+
 
     def handle(self):
         """
@@ -51,20 +57,24 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
         logger.handle(record)
 
 
+
 class LogRecordUnixDomainSocketReceiver(socketserver.ThreadingUnixStreamServer):
     """
-    Simple TCP socket-based logging receiver suitable for testing.
+    Simple Unix Domain socket-based logging receiver suitable for testing.
     """
 
     allow_reuse_address = True
 
     def __init__(self,
                  server_address="",
-                 handler=LogRecordStreamHandler):
-        socketserver.ThreadingUnixStreamServer.__init__(self, (server_address), handler)
+                 logconfig="",
+                 logname=""):
+        logging.config.dictConfig(logconfig)
+        logging.getLogger(logname).info('Log listener started.')
+        socketserver.ThreadingUnixStreamServer.__init__(self, (server_address), LogRecordStreamHandler)
         self.abort = 0
         self.timeout = 1
-        self.logname = None
+        self.logname = logname
 
     def serve_until_stopped(self):
         import select
