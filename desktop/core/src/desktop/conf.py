@@ -2615,8 +2615,8 @@ OZONE = UnspecifiedConfigSection(
 )
 
 def is_ozone_enabled():
-  if has_connectors():
-    from desktop.lib.connectors.api import _get_installed_connectors
-    return any([connector for connector in _get_installed_connectors() if connector['dialect'] == 'ofs'])
-  else:
-    return list(OZONE.keys())
+  return list(OZONE.keys())
+
+def has_ozone_access(user):
+  from desktop.auth.backend import is_admin
+  return user.is_authenticated and user.is_active and (is_admin(user) or user.has_hue_permission(action="ofs_access", app="filebrowser"))
