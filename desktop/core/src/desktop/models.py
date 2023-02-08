@@ -2033,6 +2033,18 @@ class ClusterConfig(object):
         'page': '/filebrowser/view=' + urllib_quote(home_path, safe=SAFE_CHARACTERS_URI_COMPONENTS)
       })
 
+    if 'filebrowser' in self.apps and fsmanager.is_enabled_and_has_access('ofs', self.user):
+      #TODO: Fix import path later
+      from desktop.lib.fs.ozone.client import get_ozone_home_dir
+      home_path = remote_home_storage if remote_home_storage else get_ozone_home_dir(self.user).encode('utf-8')
+      interpreters.append({
+        'type': 'ofs',
+        'displayName': _('Ozone'),
+        'buttonName': _('Browse'),
+        'tooltip': _('Ozone'),
+        'page': '/filebrowser/view=' + urllib_quote(home_path, safe=SAFE_CHARACTERS_URI_COMPONENTS)
+      })
+
     if 'metastore' in self.apps:
       interpreters.append({
         'type': 'tables',
