@@ -28,7 +28,7 @@ from aws.conf import is_enabled as is_s3_enabled, has_s3_access
 from azure.conf import is_adls_enabled, is_abfs_enabled, has_adls_access, has_abfs_access
 
 
-from desktop.conf import is_gs_enabled, has_gs_access, DEFAULT_USER, is_ozone_enabled, has_ozone_access
+from desktop.conf import is_gs_enabled, has_gs_access, DEFAULT_USER, is_ofs_enabled, has_ofs_access
 
 from desktop.lib.fs.proxyfs import ProxyFS
 from desktop.lib.python_util import current_ms_from_utc
@@ -66,7 +66,7 @@ def has_access(fs=None, user=None):
   elif fs == 'gs':
     return has_gs_access(user)
   elif fs == 'ofs':
-    return has_ozone_access(user)
+    return has_ofs_access(user)
 
 
 def is_enabled(fs):
@@ -81,7 +81,7 @@ def is_enabled(fs):
   elif fs == 'gs':
     return is_gs_enabled()
   elif fs == 'ofs':
-    return is_ozone_enabled()
+    return is_ofs_enabled()
 
 
 def is_enabled_and_has_access(fs=None, user=None):

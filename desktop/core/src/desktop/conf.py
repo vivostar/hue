@@ -2614,9 +2614,9 @@ OZONE = UnspecifiedConfigSection(
   )
 )
 
-def is_ozone_enabled():
+def is_ofs_enabled():
   return list(OZONE.keys())
 
-def has_ozone_access(user):
+def has_ofs_access(user):
   from desktop.auth.backend import is_admin
   return user.is_authenticated and user.is_active and (is_admin(user) or user.has_hue_permission(action="ofs_access", app="filebrowser"))

@@ -245,6 +245,15 @@ def view(request, path):
           '/filebrowser/view=' + urllib_quote(home_dir_path.encode('utf-8'), safe=SAFE_CHARACTERS_URI_COMPONENTS)
       )
 
+  # default_ofs_home is set in jquery.filechooser.js
+  if 'default_ofs_home' in request.GET:
+    home_dir_path = get_ofs_home_directory(request.user)
+    if request.fs.isdir(home_dir_path):
+      return format_preserving_redirect(
+          request,
+          '/filebrowser/view=' + urllib_quote(home_dir_path.encode('utf-8'), safe=SAFE_CHARACTERS_URI_COMPONENTS)
+      )
+
   # default_to_home is set in jquery.filechooser.js
   if 'default_to_home' in request.GET:
     home_dir_path = request.user.get_home_directory()
