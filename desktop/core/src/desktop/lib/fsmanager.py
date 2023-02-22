@@ -23,6 +23,7 @@ import logging
 import aws.client
 import azure.client
 import desktop.lib.fs.gc.client
+import desktop.lib.fs.ozone.client
 
 from aws.conf import is_enabled as is_s3_enabled, has_s3_access
 from azure.conf import is_adls_enabled, is_abfs_enabled, has_adls_access, has_abfs_access
@@ -100,9 +101,7 @@ def _make_client(fs, name, user):
   elif fs == 'gs':
     return desktop.lib.fs.gc.client._make_client(name, user)
   elif fs == 'ofs':
-    # TODO: Add client
-    # return desktop.lib.fs.gc.client._make_client(name, user)
-    pass
+    return desktop.lib.fs.ozone.client._make_ofs_client(name, user)
   return None
 
 

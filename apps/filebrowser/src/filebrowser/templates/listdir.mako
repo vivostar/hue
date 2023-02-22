@@ -49,7 +49,7 @@ ${ fb_components.menubar() }
   %endif
 </style>
 
-<div id="${ path.startswith('s3a://') and 'filebrowser_s3Components' or path.startswith('abfs://') and 'filebrowser_abfsComponents' or 'filebrowserComponents' }" class="container-fluid filebrowser" style="min-height: calc(100vh - 130px);">
+<div id="${ path.startswith('s3a://') and 'filebrowser_s3Components' or path.startswith('abfs://') and 'filebrowser_abfsComponents'  or path.startswith('ofs://') and 'filebrowser_ofsComponents'or 'filebrowserComponents' }" class="container-fluid filebrowser" style="min-height: calc(100vh - 130px);">
   <div class="card card-small">
     <div class="actionbar">
     <%actionbar:render>
@@ -61,7 +61,7 @@ ${ fb_components.menubar() }
         <div class="btn-toolbar" style="display: inline; vertical-align: middle">
           <div id="ch-dropdown" class="btn-group" style="vertical-align: middle">
             <button class="btn dropdown-toggle" title="${_('Actions')}" data-toggle="dropdown"
-            data-bind="visible: !inTrash(), enable: selectedFiles().length > 0 && ((!isS3() && !isABFS()) || (isS3() && !isS3Root()) || (isABFS() && !isABFSRoot()))">
+            data-bind="visible: !inTrash(), enable: selectedFiles().length > 0 && ((!isS3() && !isABFS() && !isOFS()) || (isS3() && !isS3Root()) || (isABFS() && !isABFSRoot()) || (isOFS() && !isOFSRoot() && !isOFSVol()))">
               <i class="fa fa-cog"></i> ${_('Actions')}
               <span class="caret" style="line-height: 15px"></span>
             </button>
@@ -183,12 +183,13 @@ ${ fb_components.menubar() }
               <span class="caret"></span>
             </a>
             <ul class="dropdown-menu pull-right" style="top: auto">
-              <li data-bind="visible: !isS3() && !isABFS() || isS3() && !isS3Root() || isABFS() && !isABFSRoot()"><a data-hue-analytics="filebrowser:new-file-btn-click" href="javascript: void(0)" class="create-file-link" title="${_('File')}"><i class="fa fa-file-o"></i> ${_('File')}</a></li>
+              <li data-bind="visible: !isS3() && !isABFS() && !isOFS() || isS3() && !isS3Root() || isABFS() && !isABFSRoot() || isOFS() && !isOFSRoot() && !isOFSVol()"><a data-hue-analytics="filebrowser:new-file-btn-click" href="javascript: void(0)" class="create-file-link" title="${_('File')}"><i class="fa fa-file-o"></i> ${_('File')}</a></li>
               <li><a href="javascript: void(0)" class="create-directory-link" title="${_('Directory')}">
                 <i class="fa fa-folder"></i>
-                <span data-bind="visible: !isS3() && !isABFS() || isS3() && !isS3Root() || isABFS() && !isABFSRoot()">${_('Directory')}</span>
-                <span data-bind="visible: isS3() && isS3Root()">${_('Bucket')}</span>
+                <span data-bind="visible: !isS3() && !isABFS() && !isOFS() || isS3() && !isS3Root() || isABFS() && !isABFSRoot() || isOFS() && !isOFSRoot() && !isOFSVol()">${_('Directory')}</span>
+                <span data-bind="visible: (isS3() && isS3Root()) || (isOFS() && isOFSVol())">${_('Bucket')}</span>
                 <span data-bind="visible: isABFS() && isABFSRoot()">${_('File System')}</span>
+                <span data-bind="visible: isOFS() && isOFSRoot()">${_('Volume')}</span>
               </a></li>
             </ul>
           </div>
