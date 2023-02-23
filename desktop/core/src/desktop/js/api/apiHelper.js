@@ -274,7 +274,6 @@ class ApiHelper {
    * @param {string} [options.filter]
    */
   fetchHdfsPath(options) {
-    console.log("sjbkjdsvgdshjfgewyufgewbjchewuyfwefgjaevcjg");
     if (
       options.pathParts.length > 0 &&
       (options.pathParts[0] === '/' || options.pathParts[0] === '')
@@ -347,7 +346,6 @@ class ApiHelper {
    * @param {string} [options.filter]
    */
   fetchAdlsPath(options) {
-    console.log("sdfkdsgfkdsfgdskh");
     options.pathParts.shift();
     let url =
       URLS.ADLS_API_PREFIX +
@@ -415,7 +413,6 @@ class ApiHelper {
    * @param {string} [options.filter]
    */
   fetchAbfsPath(options) {
-    console.log("habhjdsvfsefgewyugyui");
     let url =
       URLS.ABFS_API_PREFIX +
       encodeURI(options.pathParts.join('/')) +
@@ -481,7 +478,6 @@ class ApiHelper {
    * @param {string} [options.filter]
    */
   fetchOfsPath(options) {
-    console.log("svnbsjkvbskjvbskvbdskjvbskjd", options);
     let url =
       URLS.OFS_API_PREFIX +
       (options.pathParts.join('/')) +
@@ -493,7 +489,6 @@ class ApiHelper {
       url += '&filter=' + options.filter;
     }
     const fetchFunction = storeInCache => {
-      console.log("sjfhkjsdgfkhsdgfhsjkdgfjhsdfgjhsdfgjsdhfgjsdh")
       if (options.timeout === 0) {
         assistErrorCallback(options)({ status: -1 });
         return;
@@ -608,7 +603,6 @@ class ApiHelper {
    * @param {string} [options.filter]
    */
   fetchS3Path(options) {
-    console.log("vghjkadsgdashjfgsdjhfgsjhdfgsdhjfgdshjfgdshjfgdshjfgdshjfgdshjfgsdi");
     options.pathParts.shift(); // remove the trailing /
     let url =
       URLS.S3_API_PREFIX +
