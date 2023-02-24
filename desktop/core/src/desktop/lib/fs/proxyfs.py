@@ -212,17 +212,17 @@ class ProxyFS(object):
     Then we check for Ozone, and create the user home directory for it next. At last, we check if S3/ABFS is configured in Hue via RAZ. 
     If yes, try creating user home dir for them next.
     """
+    from desktop.auth.backend import rewrite_user
     from desktop.conf import RAZ # Imported dynamically in order to have proper value.
 
-    # Try first for HDFS
     try:
       self._get_fs(home_path).create_home_dir(home_path)
     except Exception as e:
       LOG.debug('Error creating HDFS home directory for path %s : %s' % (home_path, str(e)))
 
-    # If Ozone is enabled, try user home path creation for it next.
+    user = rewrite_user(User.objects.get(username=self.getuser()))
     if is_ofs_enabled():
-      home_path = get_ofs_home_directory(User.objects.get(username=self.getuser()))
+      home_path = get_ofs_home_directory(user)
       try:
         self._get_fs(home_path).create_home_dir(home_path)
       except Exception as e:
@@ -230,9 +230,9 @@ class ProxyFS(object):
 
     # Get the new home_path for S3/ABFS when RAZ is enabled.
     if is_raz_s3():
-      home_path = get_s3_home_directory(User.objects.get(username=self.getuser()))
+      home_path = get_s3_home_directory(user)
     elif is_raz_abfs():
-      home_path = get_home_dir_for_abfs(User.objects.get(username=self.getuser()))
+      home_path = get_home_dir_for_abfs(user)
 
     # Try getting user from the request and create home dirs. This helps when Hue admin is trying to create the dir for other users.
     # That way only Hue admin needs authorization to create for all Hue users and not each individual user.
