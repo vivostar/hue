@@ -26,7 +26,8 @@ from crequest.middleware import CrequestMiddleware
 from useradmin.models import User
 
 from desktop.auth.backend import is_admin
-from desktop.conf import DEFAULT_USER, ENABLE_ORGANIZATIONS
+from desktop.conf import DEFAULT_USER, ENABLE_ORGANIZATIONS, is_ofs_enabled
+from desktop.lib.fs.ozone.ozonefs import get_ofs_home_directory
 
 from aws.conf import is_raz_s3
 from aws.s3.s3fs import get_s3_home_directory
@@ -207,18 +208,25 @@ class ProxyFS(object):
 
   def create_home_dir(self, home_path=None):
     """
-    Initially home_path will have path value for HDFS and if it is configured in Hue, try creating the user home dir for it first.
-    Then we check if S3/ABFS is configured in Hue via RAZ. If yes, try creating user home dir for them next.
+    Initially home_path will have path value for HDFS and if it's configured in Hue, try creating the user home dir for it first.
+    Then we check for Ozone, and create the user home directory for it next. At last, we check if S3/ABFS is configured in Hue via RAZ. 
+    If yes, try creating user home dir for them next.
     """
     from desktop.conf import RAZ # Imported dynamically in order to have proper value.
 
-    if home_path is None:
-      home_path = self.get_home_dir()
-
+    # Try first for HDFS
     try:
       self._get_fs(home_path).create_home_dir(home_path)
     except Exception as e:
       LOG.debug('Error creating HDFS home directory for path %s : %s' % (home_path, str(e)))
+
+    # If Ozone is enabled, try user home path creation for it next.
+    if is_ofs_enabled():
+      home_path = get_ofs_home_directory(User.objects.get(username=self.getuser()))
+      try:
+        self._get_fs(home_path).create_home_bucket(home_path)
+      except Exception as e:
+        LOG.debug('Error creating Ozone home directory for path %s : %s' % (home_path, str(e)))
 
     # Get the new home_path for S3/ABFS when RAZ is enabled.
     if is_raz_s3():
