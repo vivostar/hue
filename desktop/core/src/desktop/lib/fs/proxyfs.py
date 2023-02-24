@@ -224,7 +224,7 @@ class ProxyFS(object):
     if is_ofs_enabled():
       home_path = get_ofs_home_directory(User.objects.get(username=self.getuser()))
       try:
-        self._get_fs(home_path).create_home_bucket(home_path)
+        self._get_fs(home_path).create_home_dir(home_path)
       except Exception as e:
         LOG.debug('Error creating Ozone home directory for path %s : %s' % (home_path, str(e)))
 
