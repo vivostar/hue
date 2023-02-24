@@ -480,7 +480,7 @@ class ApiHelper {
   fetchOfsPath(options) {
     let url =
       URLS.OFS_API_PREFIX +
-      (options.pathParts.join('/')) +
+      options.pathParts.join('/') +
       '?format=json&sortby=name&descending=false&pagesize=' +
       (options.pageSize || 500) +
       '&pagenum=' +
