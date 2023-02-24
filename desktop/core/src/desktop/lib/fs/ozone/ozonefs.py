@@ -46,7 +46,6 @@ class OzoneFS(WebHdfs):
   """
   OzoneFS implements the filesystem interface via the WebHDFS/HttpFS REST protocol.
   """
-
   def __init__(
       self,
       url,
@@ -64,7 +63,7 @@ class OzoneFS(WebHdfs):
     self._fs_defaultfs = fs_defaultfs
     self._logical_name = logical_name
     self.expiration = None
-    self._umask=umask
+    self._umask = umask
     self._scheme = "ofs://"
     self._is_remote = True
 

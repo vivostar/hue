@@ -83,7 +83,7 @@ def parse_uri(uri):
   """
   match = OFS_PATH_RE.match(uri)
   if not match:
-      raise ValueError("Invalid OFS URI: %s" % uri)
+    raise ValueError("Invalid OFS URI: %s" % uri)
   bucket = match.group(3) or ''
   basename = match.group(4) or ''
   return match.group(1), bucket, basename

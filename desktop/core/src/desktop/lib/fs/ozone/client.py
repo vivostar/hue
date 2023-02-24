@@ -23,6 +23,6 @@ LOG = logging.getLogger(__name__)
 
 
 def _make_ofs_client(identifier, user):
-    config = conf.OZONE[identifier] if identifier in list(conf.OZONE.keys()) else None
-
-    return OzoneFS.from_config(config)
+  config = conf.OZONE[identifier] if identifier in list(conf.OZONE.keys()) else None
+  
+  return OzoneFS.from_config(config)
