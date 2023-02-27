@@ -84,16 +84,6 @@ class OzoneFS(WebHdfs):
         umask=get_umask_mode(),
     )
 
-  def _make_client(self, url, security_enabled, ssl_cert_ca_verify=True):
-    client = http_client.HttpClient(url, exc_class=WebHdfsException, logger=LOG)
-
-    if security_enabled:
-      client.set_kerberos_auth()
-
-    client.set_verify(ssl_cert_ca_verify)
-
-    return client
-
   def strip_normpath(self, path):
     if path.startswith('ofs://'):
       path = path[5:]
