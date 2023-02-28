@@ -18,7 +18,9 @@
 """
 Interfaces for Hadoop filesystem access via HttpFs/WebHDFS
 """
+import errno
 import logging
+import sys
 import threading
 
 from desktop.lib.rest import http_client, resource
@@ -29,6 +31,10 @@ from hadoop.fs.exceptions import WebHdfsException
 from hadoop.hdfs_site import get_umask_mode
 from hadoop.fs.webhdfs import WebHdfs
 
+if sys.version_info[0] > 2:
+  from django.utils.translation import gettext as _
+else:
+  from django.utils.translation import ugettext as _
 
 LOG = logging.getLogger(__name__)
 
