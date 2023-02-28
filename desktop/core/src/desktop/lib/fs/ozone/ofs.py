@@ -21,13 +21,13 @@ Interfaces for Hadoop filesystem access via HttpFs/WebHDFS
 import logging
 import threading
 
-from desktop.lib.rest import http_client
+from desktop.lib.rest import http_client, resource
+from desktop.lib.fs.ozone import normpath, is_root, parent_path
+from desktop.lib.fs.ozone.ofsstat import OzoneFSStat
+
 from hadoop.fs.exceptions import WebHdfsException
 from hadoop.hdfs_site import get_umask_mode
-
-from desktop.lib.rest import resource
 from hadoop.fs.webhdfs import WebHdfs
-from desktop.lib.fs.ozone import normpath, is_root, parent_path
 
 
 LOG = logging.getLogger(__name__)
@@ -94,8 +94,52 @@ class OzoneFS(WebHdfs):
   def normpath(self, path):
     return normpath(path)
 
+  def netnormpath(self, path):
+    return normpath(path)
+
   def isroot(self, path):
     return is_root(path)
 
   def parent_path(self, path):
     return parent_path(path)
+
+  def listdir_stats(self, path, glob=None):
+    """
+    listdir_stats(path, glob=None) -> [ OzoneFSStat ]
+
+    Get directory listing with stats.
+    """
+    path = self.strip_normpath(path)
+    params = self._getparams()
+    if glob is not None:
+      params['filter'] = glob
+    params['op'] = 'LISTSTATUS'
+    headers = self._getheaders()
+    json = self._root.get(path, params, headers)
+    filestatus_list = json['FileStatuses']['FileStatus']
+    return [OzoneFSStat(st, path) for st in filestatus_list]
+
+  def _stats(self, path):
+    """
+    This version of stats returns None if the entry is not found.
+    """
+    path = self.strip_normpath(path)
+    params = self._getparams()
+    params['op'] = 'GETFILESTATUS'
+    headers = self._getheaders()
+    try:
+      json = self._root.get(path, params, headers)
+      return OzoneFSStat(json['FileStatus'], path)
+    except WebHdfsException as ex:
+      if ex.server_exc == 'FileNotFoundException' or ex.code == 404:
+        return None
+      raise ex
+  
+  def stats(self, path):
+    """
+    stats(path) -> OzoneFSStat
+    """
+    res = self._stats(path)
+    if res is not None:
+      return res
+    raise IOError(errno.ENOENT, _("File %s not found") % path)

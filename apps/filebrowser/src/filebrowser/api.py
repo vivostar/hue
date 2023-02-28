@@ -20,7 +20,7 @@ import logging
 from desktop.lib.django_util import JsonResponse
 from desktop.lib import fsmanager
 from desktop.lib.i18n import smart_unicode
-from desktop.lib.fs.ozone.ozonefs import get_ofs_home_directory
+from desktop.lib.fs.ozone.ofs import get_ofs_home_directory
 
 from azure.abfs.__init__ import get_home_dir_for_abfs
 from aws.s3.s3fs import get_s3_home_directory

@@ -2034,7 +2034,7 @@ class ClusterConfig(object):
       })
 
     if 'filebrowser' in self.apps and fsmanager.is_enabled_and_has_access('ofs', self.user):
-      from desktop.lib.fs.ozone.ozonefs import get_ofs_home_directory
+      from desktop.lib.fs.ozone.ofs import get_ofs_home_directory
       home_path = get_ofs_home_directory(self.user).encode('utf-8')
       interpreters.append({
         'type': 'ofs',

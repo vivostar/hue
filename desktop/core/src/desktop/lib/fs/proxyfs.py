@@ -27,7 +27,7 @@ from useradmin.models import User
 
 from desktop.auth.backend import is_admin
 from desktop.conf import DEFAULT_USER, ENABLE_ORGANIZATIONS, is_ofs_enabled
-from desktop.lib.fs.ozone.ozonefs import get_ofs_home_directory
+from desktop.lib.fs.ozone.ofs import get_ofs_home_directory
 
 from aws.conf import is_raz_s3
 from aws.s3.s3fs import get_s3_home_directory

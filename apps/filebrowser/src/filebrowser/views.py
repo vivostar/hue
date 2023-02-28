@@ -56,7 +56,7 @@ from desktop.lib.django_util import JsonResponse
 from desktop.lib.export_csvxls import file_reader
 from desktop.lib.exceptions_renderable import PopupException
 from desktop.lib.fs import splitpath
-from desktop.lib.fs.ozone.ozonefs import get_ofs_home_directory
+from desktop.lib.fs.ozone.ofs import get_ofs_home_directory
 from desktop.lib.i18n import smart_str
 from desktop.lib.paths import SAFE_CHARACTERS_URI, SAFE_CHARACTERS_URI_COMPONENTS
 from desktop.lib.tasks.compress_files.compress_utils import compress_files_in_hdfs
@@ -627,8 +627,6 @@ def listdir_paged(request, path):
 
 
 def scheme_absolute_path(root, path):
-  if root.startswith('ofs://') and not path.startswith('ofs://'):
-    path = 'ofs:/' + path 
   splitPath = lib_urlparse(path)
   splitRoot = lib_urlparse(root)
   if splitRoot.scheme and not splitPath.scheme:

@@ -14,15 +14,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
 
-from desktop import conf
-from desktop.lib.fs.ozone.ofs import OzoneFS
+from builtins import oct
+import math
+import stat
 
-LOG = logging.getLogger(__name__)
+from django.utils.encoding import smart_str
 
+from hadoop.fs.hadoopfs import decode_fs_path
+from hadoop.fs.webhdfs_types import WebHdfsStat
 
-def _make_ofs_client(identifier, user):
-  config = conf.OZONE[identifier] if identifier in list(conf.OZONE.keys()) else None
-  
-  return OzoneFS.from_config(config)
+from desktop.lib.fs.ozone import join as ofs_join
+
+class OzoneFSStat(WebHdfsStat):
+  """
+  Information about a path in Ozone.
+
+  Modelled after org.apache.hadoop.fs.FileStatus
+  """
+
+  def __init__(self, file_status, parent_path):
+    super(OzoneFSStat, self).__init__(file_status, parent_path)
+    self.path = ofs_join(parent_path, self.name)
+
+  def __unicode__(self):
+    return "[OzoneFSStat] %7s %8s %8s %12s %s%s" % (oct(self.mode), self.user, self.group, self.size, self.path, self.isDir and '/' or "")
+
+  def __repr__(self):
+    return smart_str("<OzoneFSStat %s>" % (self.path))
