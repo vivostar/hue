@@ -1123,7 +1123,7 @@ else:
         return !self.isS3() && !self.isAdls() && !self.isABFS() && !self.isOFS();
       });
       self.isSummaryEnabled = ko.pureComputed(function () {
-        return self.isHdfs();
+        return self.isHdfs() || self.isOfs();
       });
       self.isPermissionEnabled = ko.pureComputed(function () {
         return !self.isS3() && !self.isABFSRoot() && !self.isOFSRoot();
