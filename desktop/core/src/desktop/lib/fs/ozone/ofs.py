@@ -22,7 +22,7 @@ import logging
 import threading
 
 from desktop.lib.rest import http_client, resource
-from desktop.lib.fs.ozone import normpath, is_root, parent_path
+from desktop.lib.fs.ozone import OFS_ROOT, normpath, is_root, parent_path
 from desktop.lib.fs.ozone.ofsstat import OzoneFSStat
 
 from hadoop.fs.exceptions import WebHdfsException
@@ -33,13 +33,8 @@ from hadoop.fs.webhdfs import WebHdfs
 LOG = logging.getLogger(__name__)
 
 
-def get_ofs_home_directory(user=None):
-  ozone_user_home = 'ofs://'
-  if user is not None:
-    #TODO: Properly add ofs prefix in path
-    ozone_user_home = 'ofs:/' + user.get_home_directory()
-
-  return ozone_user_home
+def get_ofs_home_directory():
+  return OFS_ROOT
 
 
 class OzoneFS(WebHdfs):

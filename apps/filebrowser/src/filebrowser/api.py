@@ -69,7 +69,7 @@ def get_filesystems_with_home_dirs(request): # Using as a public API only for no
     elif fs == 'abfs':
       user_home_dir = get_home_dir_for_abfs(request.user)
     elif fs == 'ofs':
-      user_home_dir = get_ofs_home_directory(request.user)
+      user_home_dir = get_ofs_home_directory()
 
     filesystems.append({
       'file_system': fs,

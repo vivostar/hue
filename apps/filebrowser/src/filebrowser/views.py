@@ -251,7 +251,7 @@ def view(request, path):
 
   # default_ofs_home is set in jquery.filechooser.js
   if 'default_ofs_home' in request.GET:
-    home_dir_path = get_ofs_home_directory(request.user)
+    home_dir_path = get_ofs_home_directory()
     if request.fs.isdir(home_dir_path):
       return format_preserving_redirect(
           request,

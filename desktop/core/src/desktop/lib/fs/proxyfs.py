@@ -27,7 +27,7 @@ from useradmin.models import User
 
 from desktop.auth.backend import is_admin
 from desktop.conf import DEFAULT_USER, ENABLE_ORGANIZATIONS, is_ofs_enabled
-from desktop.lib.fs.ozone.ofs import get_ofs_home_directory
+from desktop.lib.fs.ozone import OFS_ROOT
 
 from aws.conf import is_raz_s3
 from aws.s3.s3fs import get_s3_home_directory
@@ -208,11 +208,9 @@ class ProxyFS(object):
 
   def create_home_dir(self, home_path=None):
     """
-    Initially home_path will have path value for HDFS and if it's configured in Hue, try creating the user home dir for it first.
-    Then we check for Ozone, and create the user home directory for it next. At last, we check if S3/ABFS is configured in Hue via RAZ. 
-    If yes, try creating user home dir for them next.
+    Initially home_path will have path value for HDFS, try creating the user home dir for it first.
+    Then, we check if S3/ABFS is configured via RAZ. If yes, try creating user home dir for them next.
     """
-    from desktop.auth.backend import rewrite_user
     from desktop.conf import RAZ # Imported dynamically in order to have proper value.
 
     try:
@@ -220,19 +218,15 @@ class ProxyFS(object):
     except Exception as e:
       LOG.debug('Error creating HDFS home directory for path %s : %s' % (home_path, str(e)))
 
-    user = rewrite_user(User.objects.get(username=self.getuser()))
+    # All users will have access to Ozone root.
     if is_ofs_enabled():
-      home_path = get_ofs_home_directory(user)
-      try:
-        self._get_fs(home_path).create_home_dir(home_path)
-      except Exception as e:
-        LOG.debug('Error creating Ozone home directory for path %s : %s' % (home_path, str(e)))
+      LOG.debug('Creation of user home path is not supported in Ozone. Redirect to %s' % OFS_ROOT)
 
     # Get the new home_path for S3/ABFS when RAZ is enabled.
     if is_raz_s3():
-      home_path = get_s3_home_directory(user)
+      home_path = get_s3_home_directory(User.objects.get(username=self.getuser()))
     elif is_raz_abfs():
-      home_path = get_home_dir_for_abfs(user)
+      home_path = get_home_dir_for_abfs(User.objects.get(username=self.getuser()))
 
     # Try getting user from the request and create home dirs. This helps when Hue admin is trying to create the dir for other users.
     # That way only Hue admin needs authorization to create for all Hue users and not each individual user.
