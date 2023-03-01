@@ -1749,3 +1749,19 @@ class TestNormalizePath(object):
 
     normalized = _normalize_path(path)
     assert_equal(path, normalized)
+
+  def test_ofs_correction(self):
+    path = 'ofs:%2Fsome%2Fpath'
+    expected_corrected_path = 'ofs://some/path'
+
+    normalized_once = _normalize_path(path)
+    assert_equal(expected_corrected_path, normalized_once)
+
+    normalized_twice = _normalize_path(normalized_once)
+    assert_equal(expected_corrected_path, normalized_twice)
+
+  def test_ofs_correction_already_correct(self):
+    path = 'ofs://some/path'
+
+    normalized = _normalize_path(path)
+    assert_equal(path, normalized)
