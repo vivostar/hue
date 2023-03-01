@@ -66,7 +66,7 @@ ${ fb_components.menubar() }
               <span class="caret" style="line-height: 15px"></span>
             </button>
             <ul class="dropdown-menu" style="top: auto">
-              <li><a data-hue-analytics="filebrowser:actions-menu/rename-click" href="javascript: void(0)" title="${_('Rename')}" data-bind="visible: !inTrash() && selectedFiles().length == 1, click: renameFile,
+              <li><a data-hue-analytics="filebrowser:actions-menu/rename-click" href="javascript: void(0)" title="${_('Rename')}" data-bind="visible: !inTrash() && selectedFiles().length == 1 && !isOFSRoot() && !isOFSVol(), click: renameFile,
               enable: selectedFiles().length == 1 && isCurrentDirSelected().length == 0"><i class="fa fa-fw fa-font"></i>
               ${_('Rename')}</a></li>
               <li><a data-hue-analytics="filebrowser:actions-menu/move-click" href="javascript: void(0)" title="${_('Move')}" data-bind="click: move, enable: selectedFiles().length > 0 &&
