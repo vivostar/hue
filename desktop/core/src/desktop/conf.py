@@ -2572,7 +2572,7 @@ OZONE = UnspecifiedConfigSection(
           "fs_defaultfs",
           help="The equivalent of fs.defaultFS (aka fs.default.name)",
           type=str,
-          default="ofs://localhost:8020"
+          default=None
       ),
       LOGICAL_NAME=Config(
           "logical_name",
@@ -2584,7 +2584,7 @@ OZONE = UnspecifiedConfigSection(
           "webhdfs_url",
           help="The URL to WebHDFS/HttpFS service. Defaults to the WebHDFS URL on the NameNode.",
           type=str,
-          default="http://localhost:50070/webhdfs/v1"
+          default=None
       ),
       SECURITY_ENABLED=Config(
           "security_enabled",
@@ -2615,7 +2615,8 @@ OZONE = UnspecifiedConfigSection(
 )
 
 def is_ofs_enabled():
-  return list(OZONE.keys())
+  return ('default' in list(OZONE.keys()) and OZONE['default'].get_raw() and OZONE['default'].WEBHDFS_URL.get())
+
 
 def has_ofs_access(user):
   from desktop.auth.backend import is_admin

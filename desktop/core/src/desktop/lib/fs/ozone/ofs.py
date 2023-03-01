@@ -75,9 +75,6 @@ class OzoneFS(WebHdfs):
     split = lib_urlparse(fs_defaultfs)
     self._scheme = split.scheme
     self._netloc = split.netloc
-    print('----------------------------------------------------------------')
-    print('scheme: ' + self._scheme)
-    print('netloc: ' + self._netloc)
 
     self._client = self._make_client(url, security_enabled, ssl_cert_ca_verify)
     self._root = resource.Resource(self._client)
