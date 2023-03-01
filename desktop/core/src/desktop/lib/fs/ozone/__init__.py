@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import re
 import posixpath
 
@@ -25,14 +26,14 @@ OFS_PATH_RE = re.compile('^/*[oO][fF][sS]?://([^/]+)(/(.*?([^/]+)?/?))?$')
 
 def is_root(uri):
   """
-  Check if URI is S3 root (S3A://)
+  Check if URI is OFS root (ofs://)
   """
   return uri.lower() == OFS_ROOT
 
 
 def normpath(path):
   """
-  Return normalized path but ignore leading S3A_ROOT prefix if it exists
+  Return normalized path but ignore leading OFS_ROOT prefix if it exists
   """
   if path.lower().startswith(OFS_ROOT):
     if is_root(path):
@@ -79,7 +80,7 @@ def _append_separator(path):
 def parse_uri(uri):
   """
   Returns tuple (bucket_name, key_name, key_basename).
-  Raises ValueError if invalid S3 URI is passed.
+  Raises ValueError if invalid OFS URI is passed.
   """
   match = OFS_PATH_RE.match(uri)
   if not match:

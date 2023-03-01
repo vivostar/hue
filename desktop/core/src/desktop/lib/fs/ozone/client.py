@@ -14,15 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import logging
 
 from desktop import conf
 from desktop.lib.fs.ozone.ofs import OzoneFS
+
 
 LOG = logging.getLogger(__name__)
 
 
 def _make_ofs_client(identifier, user):
   config = conf.OZONE[identifier] if identifier in list(conf.OZONE.keys()) else None
-  
+
   return OzoneFS.from_config(config)
