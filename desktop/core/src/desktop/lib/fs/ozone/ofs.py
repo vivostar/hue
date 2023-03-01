@@ -26,6 +26,7 @@ import threading
 from desktop.lib.rest import http_client, resource
 from desktop.lib.fs.ozone import OFS_ROOT, normpath, is_root, parent_path
 from desktop.lib.fs.ozone.ofsstat import OzoneFSStat
+from desktop.conf import PERMISSION_ACTION_OFS
 
 from hadoop.fs.exceptions import WebHdfsException
 from hadoop.hdfs_site import get_umask_mode
@@ -69,6 +70,7 @@ class OzoneFS(WebHdfs):
     self.expiration = None
     self._umask = umask
     self._is_remote = True
+    self._filebrowser_action = PERMISSION_ACTION_OFS
 
     split = lib_urlparse(fs_defaultfs)
     self._scheme = split.scheme
@@ -131,7 +133,7 @@ class OzoneFS(WebHdfs):
 
   def _stats(self, path):
     """
-    This version of stats returns None if the entry is not found.
+    This stats method returns None if the entry is not found.
     """
     path = self.strip_normpath(path)
     params = self._getparams()
@@ -153,3 +155,6 @@ class OzoneFS(WebHdfs):
     if res is not None:
       return res
     raise IOError(errno.ENOENT, _("File %s not found") % path)
+
+  def filebrowser_action(self):
+    return self._filebrowser_action

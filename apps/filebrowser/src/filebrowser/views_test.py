@@ -53,7 +53,7 @@ from nose.tools import assert_true, assert_false, assert_equal, assert_not_equal
 from desktop.lib.django_test_util import make_logged_in_client
 from desktop.lib.test_utils import grant_access, add_to_group, add_permission, remove_from_group
 from desktop.lib.view_util import location_to_url
-from desktop.conf import is_oozie_enabled, RAZ
+from desktop.conf import is_oozie_enabled, RAZ, is_ofs_enabled
 
 from hadoop import pseudo_hdfs4
 from hadoop.conf import UPLOAD_CHUNK_SIZE
@@ -1529,6 +1529,45 @@ class TestADLSAccessPermissions(object):
       assert_equal(200, response.status_code)
     finally:
       remove_from_group(self.user.username, 'has_adls')
+
+class TestOFSAccessPermissions(object):
+  def setUp(self):
+    self.client = make_logged_in_client(username="test", groupname="default", recreate=True, is_superuser=False)
+    grant_access('test', 'test', 'filebrowser')
+    add_to_group('test')
+
+    self.user = User.objects.get(username="test")
+
+  def test_no_default_permissions(self):
+    response = self.client.get('/filebrowser/view=ofs://')
+    assert_equal(500, response.status_code)
+
+    response = self.client.get('/filebrowser/view=ofs://volume')
+    assert_equal(500, response.status_code)
+
+    response = self.client.get('/filebrowser/view=ofs://volume/bucket')
+    assert_equal(500, response.status_code)
+
+    response = self.client.get('/filebrowser/view=ofs://volume/bucket/hue')
+    assert_equal(500, response.status_code)
+
+    response = self.client.post('/filebrowser/rmtree', dict(path=['ofs://volume/bucket/hue']))
+    assert_equal(500, response.status_code)
+
+    # 500 for real currently
+    assert_raises(IOError, self.client.get, '/filebrowser/edit=ofs://volume/bucket/hue')
+
+  def test_has_default_permissions(self):
+    if not is_ofs_enabled():
+      raise SkipTest
+
+    add_permission(self.user.username, 'has_ofs', permname='ofs_access', appname='filebrowser')
+
+    try:
+      response = self.client.get('/filebrowser/view=ofs://')
+      assert_equal(200, response.status_code)
+    finally:
+      remove_from_group(self.user.username, 'has_ofs')
 
 
 class TestFileChooserRedirect(object):
