@@ -53,7 +53,7 @@ from nose.tools import assert_true, assert_false, assert_equal, assert_not_equal
 from desktop.lib.django_test_util import make_logged_in_client
 from desktop.lib.test_utils import grant_access, add_to_group, add_permission, remove_from_group
 from desktop.lib.view_util import location_to_url
-from desktop.conf import is_oozie_enabled, RAZ, is_ofs_enabled
+from desktop.conf import is_oozie_enabled, RAZ, is_ofs_enabled, OZONE
 
 from hadoop import pseudo_hdfs4
 from hadoop.conf import UPLOAD_CHUNK_SIZE
@@ -1579,7 +1579,7 @@ class TestFileChooserRedirect(object):
 
     self.user = User.objects.get(username="test")
 
-  def test_hdfs_redirect(self):
+  def test_fs_redirect(self):
     with patch('desktop.lib.fs.proxyfs.ProxyFS.isdir') as is_dir:
       is_dir.return_value = True
 
@@ -1589,11 +1589,34 @@ class TestFileChooserRedirect(object):
       assert_equal(302, response.status_code)
       assert_equal('/filebrowser/view=%2Fuser%2Ftest', response.url)
 
-      # ABFS - default_abfs_home
-      response = self.client.get('/filebrowser/view=%2F?default_abfs_home')
+      # OFS - default_ofs_home
+      reset = OZONE['default'].WEBHDFS_URL.set_for_testing(None)
+      try:
+        response = self.client.get('/filebrowser/view=%2F?default_ofs_home')
 
-      assert_equal(302, response.status_code)
-      assert_equal('/filebrowser/view=abfs%3A%2F%2F', response.url)
+        assert_equal(302, response.status_code)
+        assert_equal('/filebrowser/view=ofs%3A%2F%2F', response.url)
+      finally:
+        reset()
+
+      reset = OZONE['default'].WEBHDFS_URL.set_for_testing('http://localhost:9778/webhdfs/v1')
+      try:
+        response = self.client.get('/filebrowser/view=%2F?default_ofs_home')
+
+        assert_equal(302, response.status_code)
+        assert_equal('/filebrowser/view=ofs%3A%2F%2F', response.url)
+      finally:
+        reset()
+
+      # ABFS - default_abfs_home
+      reset = ABFS_CLUSTERS['default'].FS_DEFAULTFS.set_for_testing(None)
+      try:
+        response = self.client.get('/filebrowser/view=%2F?default_abfs_home')
+
+        assert_equal(302, response.status_code)
+        assert_equal('/filebrowser/view=abfs%3A%2F%2F', response.url)
+      finally:
+        reset()
 
       reset = ABFS_CLUSTERS['default'].FS_DEFAULTFS.set_for_testing('abfs://data-container@mystorage.dfs.core.windows.net')
       try:
@@ -1631,10 +1654,14 @@ class TestFileChooserRedirect(object):
           reset()
 
       # S3A - default_s3_home
-      response = self.client.get('/filebrowser/view=%2F?default_s3_home')
+      reset = REMOTE_STORAGE_HOME.set_for_testing(None)
+      try:
+        response = self.client.get('/filebrowser/view=%2F?default_s3_home')
 
-      assert_equal(302, response.status_code)
-      assert_equal('/filebrowser/view=s3a%3A%2F%2F', response.url)
+        assert_equal(302, response.status_code)
+        assert_equal('/filebrowser/view=s3a%3A%2F%2F', response.url)
+      finally:
+        reset()
 
       reset = REMOTE_STORAGE_HOME.set_for_testing('s3a://my_bucket')
       try:
