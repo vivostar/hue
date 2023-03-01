@@ -33,8 +33,11 @@ from hadoop.fs.webhdfs import WebHdfs
 
 if sys.version_info[0] > 2:
   from django.utils.translation import gettext as _
+  from urllib.parse import urlparse as lib_urlparse
 else:
   from django.utils.translation import ugettext as _
+  from urlparse import urlparse as lib_urlparse
+
 
 LOG = logging.getLogger(__name__)
 
@@ -65,8 +68,14 @@ class OzoneFS(WebHdfs):
     self._logical_name = logical_name
     self.expiration = None
     self._umask = umask
-    self._scheme = "ofs://"
     self._is_remote = True
+
+    split = lib_urlparse(fs_defaultfs)
+    self._scheme = split.scheme
+    self._netloc = split.netloc
+    print('----------------------------------------------------------------')
+    print('scheme: ' + self._scheme)
+    print('netloc: ' + self._netloc)
 
     self._client = self._make_client(url, security_enabled, ssl_cert_ca_verify)
     self._root = resource.Resource(self._client)
