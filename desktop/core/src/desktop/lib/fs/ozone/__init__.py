@@ -49,8 +49,8 @@ def abspath(cd, uri):
   """
   Returns absolute URI, examples:
 
-  abspath('s3a://bucket/key', key2') == 's3a://bucket/key/key2'
-  abspath('s3a://bucket/key', 's3a://bucket2/key2') == 'sa://bucket2/key2'
+  abspath('ofs://volume/bucket/key', key2') == 'ofs://volume/bucket/key/key2'
+  abspath('ofs://volume/bucket/key', 'ofs://volume/bucket2/key2') == 'ofs://volume/bucket2/key2'
   """
   if cd.lower().startswith(OFS_ROOT):
     uri = join(cd, uri)
@@ -79,7 +79,7 @@ def _append_separator(path):
 
 def parse_uri(uri):
   """
-  Returns tuple (bucket_name, key_name, key_basename).
+  Returns tuple (volume_name, bucket_name, key_name).
   Raises ValueError if invalid OFS URI is passed.
   """
   match = OFS_PATH_RE.match(uri)

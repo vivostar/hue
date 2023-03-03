@@ -96,8 +96,6 @@ class OzoneFS(WebHdfs):
   def strip_normpath(self, path):
     if path.startswith('ofs://'):
       path = path[5:]
-    if path.startswith('ofs:/'):   ## when filechooser opens it is giving ofs:/path
-      path = path[4:]              ## need to check why
     return path
 
   def normpath(self, path):
