@@ -51,35 +51,25 @@ class OzoneFS(WebHdfs):
   """
   OzoneFS implements the filesystem interface via the WebHDFS/HttpFS REST protocol.
   """
-  def __init__(
-      self,
+  def __init__(self, url, fs_defaultfs, logical_name=None, security_enabled=False, ssl_cert_ca_verify=True, temp_dir="/tmp", umask=0o1022):
+    super(OzoneFS, self).__init__(
       url,
       fs_defaultfs,
-      logical_name=None,
-      security_enabled=False,
-      ssl_cert_ca_verify=True,
-      temp_dir="/tmp",
-      umask=0o1022,
-      ):
-    self._url = url
-    self._security_enabled = security_enabled
-    self._ssl_cert_ca_verify = ssl_cert_ca_verify
-    self._temp_dir = temp_dir
-    self._fs_defaultfs = fs_defaultfs
-    self._logical_name = logical_name
-    self.expiration = None
-    self._umask = umask
-    self._is_remote = True
-    self._filebrowser_action = PERMISSION_ACTION_OFS
+      logical_name=logical_name,
+      security_enabled=security_enabled,
+      ssl_cert_ca_verify=ssl_cert_ca_verify,
+      temp_dir=temp_dir,
+      umask=umask
+    )
 
     split = lib_urlparse(fs_defaultfs)
     self._scheme = split.scheme
     self._netloc = split.netloc
 
-    self._client = self._make_client(url, security_enabled, ssl_cert_ca_verify)
-    self._root = resource.Resource(self._client)
+    self._filebrowser_action = PERMISSION_ACTION_OFS
+    self._has_trash_support = False
+    self._is_remote = True
 
-    self._thread_local = threading.local()
 
   @classmethod
   def from_config(cls, ofs_config):
@@ -156,4 +146,4 @@ class OzoneFS(WebHdfs):
 
   def rename(self, old, new):
     self.copy(old, new, recursive=True)
-    self.rmtree(old, True)
+    self.rmtree(old, skip_trash=True)
