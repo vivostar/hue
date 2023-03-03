@@ -70,6 +70,7 @@ class OzoneFS(WebHdfs):
     self._has_trash_support = False
     self._is_remote = True
 
+    LOG.debug("Initializing Ozone client: %s (security: %s, superuser: %s)" % (self._url, self._security_enabled, self._superuser))
 
   @classmethod
   def from_config(cls, ofs_config):
