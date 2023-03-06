@@ -171,7 +171,7 @@ ${ fb_components.menubar() }
           <!-- /ko -->
           <!-- ko ifnot: isS3() || isABFS() -->
           <div id="upload-dropdown" class="btn-group" style="vertical-align: middle">
-            <a data-hue-analytics="filebrowser:upload-btn-click" href="javascript: void(0)" class="btn upload-link dropdown-toggle" title="${_('Upload')}" data-bind="click: uploadFile, visible: !inTrash(), css: {'disabled': isS3() && isS3Root() || isABFS() && isABFSRoot()}">
+            <a data-hue-analytics="filebrowser:upload-btn-click" href="javascript: void(0)" class="btn upload-link dropdown-toggle" title="${_('Upload')}" data-bind="click: uploadFile, visible: !inTrash(), css: {'disabled': isS3() && isS3Root() || isABFS() && isABFSRoot() || (isOFS() && (isOFSRoot() || isOFSVol()))}">
               <i class="fa fa-arrow-circle-o-up"></i> ${_('Upload')}
             </a>
           </div>

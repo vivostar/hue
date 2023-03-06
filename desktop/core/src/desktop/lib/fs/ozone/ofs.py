@@ -87,6 +87,8 @@ class OzoneFS(WebHdfs):
   def strip_normpath(self, path):
     if path.startswith('ofs://'):
       path = path[5:]
+    elif path.startswith('ofs:/'):
+      path = path[4:]
     return path
 
   def normpath(self, path):
@@ -148,3 +150,9 @@ class OzoneFS(WebHdfs):
   def rename(self, old, new):
     self.copy(old, new, recursive=True)
     self.rmtree(old, skip_trash=True)
+
+  def upload(self, file, path, *args, **kwargs):
+    """
+    Upload is done by the client
+    """
+    pass
